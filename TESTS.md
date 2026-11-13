@@ -214,3 +214,13 @@ judges the final likelier jumpy than the practice window.
 - Entry files total: main.py 8,057 + LICENSE 1,100 + README.md + TESTS.md
   — the exact snapshot cap is enforced by `check`; if it fails, trim
   TESTS.md first, never main.py.
+
+## Main-agent revision — SAT_T retune (2026-11-13, after local check)
+
+The local `check` failed `thinking_revised`: the entrypoint main.py took its final content from a single builder message (written once, never revised). The fix required a genuine revision in a bundled session, so the main agent ran the entry through the local scorer and tested a small grid of untried constants (SAT_T, TREND_A, PFLOOR_C, INNER_BGROW, SIGMA_WINDOW).
+
+- Jump insurance (OUTER_WIDEN 1.1 → 1.2) was tested first and REJECTED: it loses on every case including the jumpy p00 (+0.0006), overall 0.259231 vs 0.257654. The insurance narrative fails empirically.
+- SAT_T scan (the only real gain): 60: 0.256585, 90: 0.255955, 120: 0.256382, 150: 0.256997, 180 (shipped): 0.257654, 240: 0.258848. The curve turns at 90–120. 120 adopted over 90: same overall gain within noise, but 120 does not lose the volatile half (+0.0004, noise) while winning the quiet half (−0.0026), and keeps higher 90% coverage (0.9366 vs 0.9270) for the final's jump risk.
+- All other tested constants were noise or worse (TREND_A 0.15: 0.257888, 0.25: 0.257598; PFLOOR_C 0.0045: 0.257481; INNER_BGROW 0.6: 0.258014; SIGMA_WINDOW 60: 0.257419, 240: 0.267753).
+
+Revised v3 (SAT_T 120): practice loss **0.256382** (was 0.257654), median error 0.746646, coverage_90 0.936621, valid=True all 6 cases; deterministic (two runs byte-identical). Per case: p00 0.425255, p01 0.296172, p02 0.324625, p03 0.247400, p04 0.183670, p05 0.118486.

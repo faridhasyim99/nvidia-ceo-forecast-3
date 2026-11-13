@@ -87,7 +87,14 @@ SIGMA_CAP = 0.005
 # Price-scaled sigma floor: max(SIGMA_FLOOR, PFLOOR_C * sqrt(x*(1-x))).
 PFLOOR_C = 0.005
 # Horizon saturation: spread(h) = sigma * sqrt(h / (1 + h / SAT_T)).
-SAT_T = 180.0
+# SAT_T retuned 2026-11-13 (main-agent revision): the saturation timescale
+# was too long at 180 — the loss curve over SAT_T turns at 90-120
+# (60: 0.256585, 90: 0.255955, 120: 0.256382, 150: 0.256997,
+#  180: 0.257654, 240: 0.258848). 120 chosen over 90: same overall gain
+# within noise, but it does not lose the volatile half (+0.0004, noise)
+# while winning the quiet half (-0.0026), and it keeps higher 90%
+# coverage (0.9366 vs 0.9270) for the final's jump risk.
+SAT_T = 120.0
 # Outer (5%/95%) widening factor.
 OUTER_WIDEN = 1.1
 # Inner (25%/75%) narrowing: b(h) = INNER_B0 + INNER_BGROW * h / horizon.
